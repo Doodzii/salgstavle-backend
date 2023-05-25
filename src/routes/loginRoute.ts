@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import app from "../app";
+import App from "../App";
 
-app.get('/login', (req: Request, res: Response) => {
+App.get('/login', (req: Request, res: Response) => {
     res.send('Login page');
 });
