@@ -1,6 +1,8 @@
+import config from "../../config";
+
 const verifyMail = (code: String) => {
     return `
-<html>
+    <html>
     <head>
       <style>
         body {
@@ -14,38 +16,52 @@ const verifyMail = (code: String) => {
         }
 
         p {
-          color: #666666;
+          color: #3b3b3b;
           font-size: 20px;
           line-height: 1.0;
           margin-bottom: 15px;
         }
 
-        .verification-code {
-          font-size: 28px;
-          font-weight: bold;
-          color: #ff5d5d;
-          display: inline-block;
-          padding: 10px 20px;
-          background-color: #FFFFFF;
-          border-radius: 5px;
-          border: 2px solid #9f9f9f;
+        .verify-button {
+          width: 500px;
+          height: 60px;
+          font-size: 25px;
+          background-color: #d64141;
+          color: rgb(255, 255, 255);
+          border: 0px;
+          cursor: pointer;
+          border-radius: 20px;
         }
         
+        .footer {
+          color: red;
+        }
+
       </style>
 
     </head>
 
     <body>
-      <p class="header">Engangskode til Salgstavlen</p>
+      
+      <p class="header">🎯 Verificer din email</p>
       <p>
-        Denne kode kan kun bruges én gang og udløber om 15 minutter:
+        Denne mail er gyldig i 15 minutter
       </p>
-      <p>
-        <span class="verification-code">${code}</span>
-      </p>
+
+      <a href="${config.frontend_url}/verify?code=${code}" target="_blank">
+        <button class="verify-button">Verificér mail</button>
+      </a>
+      
       <p>
         Hvis du ikke har foretaget denne anmodning, bedes du ignorere denne mail.
       </p>
+
+      <div class="footer">
+        <p style="color: red; font-size: 17px;"><i><b>
+          Salgstavlen
+        </b></i></p>
+      </div>
+
     </body>
 </html>
 `

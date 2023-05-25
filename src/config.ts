@@ -1,4 +1,5 @@
 const devConfig = {
+    frontend_url: 'http://127.0.0.1:5173',
     db_host: '135.181.20.58',
     db_port: '26063',
     db_user: 'doodie',
@@ -11,13 +12,14 @@ const devConfig = {
 };
   
 const prodConfig = {
-    db_host: 'localhost',
-    db_port: '26063',
-    db_user: 'your_username',
-    db_password: 'your_password',
-    db_database: 'your_database',
+    frontend_url: '',
+    db_host: '',
+    db_port: '',
+    db_user: '',
+    db_password: '',
+    db_database: '',
     email_host: "",
-    email_port: 587,
+    email_port: 0,
     email_username: "",
     email_password: ""
 };

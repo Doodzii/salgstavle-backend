@@ -1,52 +1,73 @@
 import { Request, Response } from 'express';
+import crypto from "crypto";
 import * as EmailValidator from 'email-validator';
 
-
-import {connection, asyncQuery } from "../Database";
+import {connection, asyncQuery } from "../database/Database";
 import {sendMail} from "../mail/MailService";
 import verifyMail from '../mail/templates/VerifyMail';
 import App from "../App";
-import { TSError } from 'ts-node';
 
 App.post('/apply', async (req: Request, res: Response) => {
     const email = req.body.email;
     const provider = req.body.provider;
     const team = req.body.team;
     
+    //Missing fields
     if (!email || !provider || !team) {
         res.status(400).json({ error: "Missing required fields" })
         return;
     }
     
+    //Email is invalid
     if (!EmailValidator.validate(email)) {
         res.status(202).json({ error: "Du har angivet en ugyldig email", clear: false })
         return;
     }
 
     //Check if the email is already registered
-    let results = await asyncQuery("SELECT * FROM `applications` a WHERE a.email = ?", [email]);
-    
+    let results = await asyncQuery("SELECT * FROM `applications` a WHERE a.email = ? AND (a.verify_timestamp >= ? OR a.verified = 'TRUE')", [email, Date.now()]);
     if (results.length > 0) {
         res.status(202).json({ error: "Du har allerede sendt en ansøgning!", clear: false})
         return;
     }
-
-    let verifyCode = `${generateVerifyCode()}`
+    
+    //Delete all rows with defined email
+    await asyncQuery("DELETE FROM `applications` WHERE email = ?", [email]);
 
     //Insert application into the database
-    connection.query("INSERT INTO `applications` (`email`, `provider`, `team`, `verify_code`) VALUES (?, ?, ?, ?)", [email, provider, team, verifyCode])
- 
+    let verifyCode = `${generateVerifyCode(45)}`
+    connection.query("INSERT INTO `applications` (`email`, `provider`, `team`, `verify_code`, `verify_timestamp`) VALUES (?, ?, ?, ?, ?)", 
+        [email, provider, team, verifyCode, Date.now()+900_000])
+    
+    //Send the user an email
     sendMail({
         to: email,
         subject: "Verificer din email adresse",
         html: verifyMail(verifyCode)
     });
 
+    
     res.status(200).json({ success: "Din ansøgning er blevet sendt!", clear: true });
 });
 
-function generateVerifyCode() {
-    const min = 1000000;
-    const max = 9999999; 
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+
+
+function generateVerifyCode(length: number) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+    let code = '';
+    let bytesNeeded = Math.ceil((length * 6) / 8); // Number of bytes needed
+  
+    while (code.length < length) {
+        const randomBytes = crypto.randomBytes(bytesNeeded);
+        const randomIndexes = new Uint8Array(randomBytes);
+
+        for (let i = 0; i < randomIndexes.length; i++) {
+            const index = randomIndexes[i] % characters.length;
+            if (code.length < length) {
+                code += characters.charAt(index);
+            }
+        }
+    }
+    return code;
+}

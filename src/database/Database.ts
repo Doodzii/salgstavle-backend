@@ -1,5 +1,5 @@
 const mysql = require('mysql2');
-import config from "./config";
+import config from "../config";
 
 import { TSError } from 'ts-node';
 

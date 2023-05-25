@@ -1,10 +1,11 @@
 import { TSError } from 'ts-node';
 
 import App from "./App";
-import { connection } from './Database';
+import { connection } from './database/Database';
 
 import "./routes/applyRoute";
 import "./routes/loginRoute";
+import "./routes/verifyRoute"
 
 const port = 3000;
 
