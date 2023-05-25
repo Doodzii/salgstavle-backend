@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-
 import * as EmailValidator from 'email-validator';
 
+
 import {connection, asyncQuery } from "../Database";
+import {sendMail} from "../mail/MailService";
+import verifyMail from '../mail/templates/VerifyMail';
 import App from "../App";
 import { TSError } from 'ts-node';
 
@@ -29,8 +31,22 @@ App.post('/apply', async (req: Request, res: Response) => {
         return;
     }
 
+    let verifyCode = `${generateVerifyCode()}`
+
     //Insert application into the database
-    connection.query("INSERT INTO `applications` (`email`, `provider`, `team`) VALUES (?, ?, ?)", [email, provider, team])
+    connection.query("INSERT INTO `applications` (`email`, `provider`, `team`, `verify_code`) VALUES (?, ?, ?, ?)", [email, provider, team, verifyCode])
+ 
+    sendMail({
+        to: email,
+        subject: "Verificer din email adresse",
+        html: verifyMail(verifyCode)
+    });
 
     res.status(200).json({ success: "Din ansøgning er blevet sendt!", clear: true });
 });
+
+function generateVerifyCode() {
+    const min = 1000000;
+    const max = 9999999; 
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
