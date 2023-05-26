@@ -5,7 +5,8 @@ import { connection } from './database/Database';
 
 import "./routes/applyRoute";
 import "./routes/loginRoute";
-import "./routes/verifyRoute";
+import "./routes/validateSessionRoute"
+import "./routes/verifyEmailRoute";
 
 const port = 3000;
 

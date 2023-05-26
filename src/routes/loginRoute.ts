@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
+
 import App from "../App";
+
 import { asyncQuery } from '../database/Database';
 import { matchPassword } from '../utils/PasswordUtils';
+import { generateSessionToken, getStoredSessionToken } from '../utils/UserUtils';
+
 
 App.post('/login', async (req: Request, res: Response) => {
     
@@ -26,5 +30,11 @@ App.post('/login', async (req: Request, res: Response) => {
         return res.status(202).json({error: "Brugernavn eller adgangskode er forkert."});
     }
 
-    res.status(200).json({success: "Du er nu logget ind"});
+    //Get or create a valid session token
+    let sessionToken = await getStoredSessionToken(result.id);
+    if (!sessionToken) {
+        sessionToken = await generateSessionToken(result.id);
+    }
+        
+    res.status(200).json({success: "Du er nu logget ind", session: sessionToken});
 });
