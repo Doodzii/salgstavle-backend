@@ -5,18 +5,18 @@ import { connection } from './database/Database';
 
 import "./routes/applyRoute";
 import "./routes/loginRoute";
-import "./routes/verifyRoute"
+import "./routes/verifyRoute";
 
 const port = 3000;
 
 connection.connect((err: TSError) => {
   if (err) {
-    console.error('Error connecting to the database:', err);
+    console.error('❌ MySQL connection error', err);
     return;
   }
-  console.log('Connected to the database!');
+  console.log('✔️  MySQL connection established');
 });
 
 App.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`✔️  Express running on port ${port}`);
 });

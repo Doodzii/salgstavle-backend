@@ -1,29 +1,26 @@
 import { Request, Response } from 'express';
 import App from "../App";
-import { connection, asyncQuery } from "../database/Database";
+import { asyncQuery } from "../database/Database";
 
 App.post('/verify', async (req: Request, res: Response) => {
-    const code = req.body.code;
-    console.log("debug!");
+    
+    const { code } = req.body;
 
     //Missing fields
     if (!code) {
-        res.status(400).json({ error: "Missing required fields" })
-        return;
+        return res.status(400).json({ error: "Missing required fields" });
     }
 
     //Validate code
-    let results = await asyncQuery("SELECT * FROM `applications` a WHERE a.verify_code = ? && a.verified = ?", [code, "FALSE"]);
+    const results = await asyncQuery("SELECT * FROM `applications` a WHERE a.verify_code = ? && a.verified = ?", [code, "FALSE"]);
     if (results.length <= 0) {
-        res.status(202).json({ error: "Enten er linket ugyldigt eller udløbet." })
-        return;
+        return res.status(202).json({ error: "Enten er linket ugyldigt eller udløbet." });
     }
 
-    let result = results[0];
-    
+    //Mark email as verified in the database
+    const result = results[0];
     await asyncQuery("UPDATE `applications` SET `verified` = ? WHERE `id` = ? ", ["TRUE", result.id])
 
+    //Send success to frontend
     res.status(200).json({ success: "Din email er nu blevet verificeret!" });
-
-    console.log("Result: "+JSON.stringify(result));
 });
